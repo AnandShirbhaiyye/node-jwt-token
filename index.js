@@ -21,12 +21,40 @@ app.post('/login',(req, res)=>{
         username: "Anand",
         email: "anand@gmail.com"
     }
-    jwt.sign({user},screatkey, {expiresIn: '300s'}, (err, token)=>{
+    jwt.sign({user},screatkey, {expiresIn: '3000s'}, (err, token)=>{
         res.json({
             token
         })
     })
 })
+
+app.post("/profile",verifyToken,(req, res)=>{
+    jwt.verify(req.token, screatkey, (err,authData)=>{
+        if(err){
+            err.send({result: "Invalid Token"})
+        }
+        else{
+            res.json({
+                message:"profile accessed",
+                authData
+            })
+        }
+    })
+})
+
+function verifyToken(req, res, next){
+    const bearerHeader = req.headers['authorization'];
+    if(typeof bearerHeader !== "undefined"){
+        const bearer = bearerHeader.split(" ");
+        const token = bearer[1];
+        req.token=token;
+        next();
+    }else{
+        res.send({
+            result: "Token is not valid"            
+        })
+    }
+}
 
 const PORT = 5000;
 app.listen(PORT, () => {
